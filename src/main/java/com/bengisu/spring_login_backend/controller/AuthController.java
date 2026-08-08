@@ -33,7 +33,6 @@ public class AuthController {
         if (request.email() == null || request.email().isBlank() || request.password() == null
                 || request.password().isBlank()) {
             return ResponseEntity.badRequest().body(new ErrorResponse("Email ve şifre zorunlu"));
-
         }
 
         if (request.password().length() < 6) {
@@ -47,7 +46,7 @@ public class AuthController {
         User user = new User();
         user.setEmail(request.email());
 
-        user.setPasswordHash((passwordEncoder.encode(request.password())));
+        user.setPasswordHash(passwordEncoder.encode(request.password()));
 
         User saved = userRepository.save(user);
 
