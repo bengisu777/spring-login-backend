@@ -2,3 +2,4 @@ spring.datasource.url=jdbc:postgresql://localhost:5432/spring_login_db
 spring.datasource.username=spring_login_user
 spring.datasource.password=BURAYA_KENDI_SIFRENI_YAZ
 spring.jpa.hibernate.ddl-auto=update
+jwt.secret=BURAYA_RASTGELE_BIR_STRING_YAZ
