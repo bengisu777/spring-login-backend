@@ -13,6 +13,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PutMapping;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -65,6 +68,46 @@ public class NoteController {
     @GetMapping
     public List<NoteResponse> list(Authentication authentication) {
         return noteRepository.findByUserId(currentUser(authentication).getId()).stream().map(this::toResponse).toList();
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> getOne(@PathVariable Long id, Authentication authentication) {
+        var noteOpt = noteRepository.findByIdAndUserId(id, currentUser(authentication).getId());
+
+        if (noteOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Not bulunamadı"));
+        }
+
+        return ResponseEntity.ok(toResponse(noteOpt.get()));
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> update(@PathVariable Long id, @RequestBody NoteRequest request,
+            Authentication authentication) {
+        if (request.title() == null | request.title().isBlank()) {
+            return ResponseEntity.badRequest().body(new ErrorResponse("Başlık zorunlu"));
+        }
+
+        var noteOpt = noteRepository.findByIdAndUserId(id, currentUser(authentication).getId());
+        if (noteOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Not bulunamadı"));
+        }
+
+        Note note = noteOpt.get();
+        note.setTitle(request.title());
+        note.setContent(request.content());
+        return ResponseEntity.ok(noteRepository.save(note));
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id, Authentication authentication) {
+        var noteOpt = noteRepository.findByIdAndUserId(id, currentUser(authentication).getId());
+        if (noteOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Not bulunamadı"));
+        }
+
+        noteRepository.delete(noteOpt.get());
+        return ResponseEntity.noContent().build();
     }
 
 }
